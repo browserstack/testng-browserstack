@@ -3,7 +3,7 @@ package com.browserstack;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class LocalTest extends SeleniumTest {
+public class BStackLocalTest extends SeleniumTest {
 
     @Test
     public void test() throws Exception {

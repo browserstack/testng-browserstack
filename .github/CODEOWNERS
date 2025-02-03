@@ -1,1 +1,3 @@
 .github/workflows/*.yml @browserstack/asi-devs
+
+* @browserstack/automate-public-repos

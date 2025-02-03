@@ -3,7 +3,7 @@
 <suite name="Local">
     <test name="LocalTest">
         <classes>
-            <class name="com.browserstack.LocalTest"/>
+            <class name="com.browserstack.BStackLocalTest"/>
         </classes>
     </test>
 </suite>
