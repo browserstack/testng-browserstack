@@ -9,7 +9,7 @@
 ### Run sample build
 
 - Clone the repository
-- Replace YOUR_USERNAME and YOUR_ACCESS_KEY with your BrowserStack access credentials in browserstack.yml.
+- Update the browserstack.yml file with your BrowserStack username and access key by replacing YOUR_USERNAME and YOUR_ACCESS_KEY.
 - Install dependencies `mvn compile`
 - To run the test suite having cross-platform with parallelization, run `mvn test -P sample-test`
 - To run local tests, run `mvn test -P sample-local-test`
@@ -67,7 +67,7 @@ This repository uses the BrowserStack SDK to run tests on BrowserStack. Follow t
 ### Run sample build
 
 - Clone the repository
-- Install dependencies `gradle build`
+- Install dependencies `build.gradle`
 - To run the test suite having cross-platform with parallelization, run `gradle sampleTest`
 - To run local tests, run `gradle sampleLocalTest`
 
@@ -77,7 +77,7 @@ Understand how many parallel sessions you need by using our [Parallel Test Calcu
 
 This repository uses the BrowserStack SDK to run tests on BrowserStack. Follow the steps below to install the SDK in your test suite and run tests on BrowserStack:
 
-* Following are the changes required in `gradle.build` -
+* Following are the changes required in `build.gradle` -
     * Add `compileOnly 'com.browserstack:browserstack-java-sdk:latest.release'` in dependencies
     * Fetch Artifact Information and add `jvmArgs` property in tasks *SampleTest* and *SampleLocalTest* :
   ```
