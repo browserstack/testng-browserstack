@@ -10,8 +10,11 @@ public class NOWDemoTest extends SeleniumTest {
         driver.get("https://www.bstackdemo.com");
 
         String webDomainFromEnv = System.getenv("NOW_WEB_DOMAIN");
-
+        System.out.println("Web Domain from Env: " + webDomainFromEnv);
+        Assert.assertTrue(driver.getPageSource().length() > 100);
         // Check the title.
-        Assert.assertTrue(driver.getTitle().toString().contains(webDomainFromEnv));
+        String pageTitle = driver.getTitle();
+        System.out.println("Page title is: " + pageTitle);
+        Assert.assertTrue(pageTitle.contains(webDomainFromEnv));
     }
 }
