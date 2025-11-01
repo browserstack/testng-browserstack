@@ -6,7 +6,7 @@ import com.browserstack.SeleniumTest;
 
 public class NOWDemoTest extends SeleniumTest {
     @Test
-    public void addProductToCart() throws Exception {
+    public void openTestPage() throws Exception {
         driver.get("https://www.bstackdemo.com");
 
         // Check the title. Always passes.
