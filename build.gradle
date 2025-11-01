@@ -5,18 +5,15 @@ plugins {
 repositories { mavenCentral() }
 
 dependencies {
-    implementation 'org.testng:testng:7.4.0'
-    implementation 'commons-io:commons-io:1.3.2'
+    testImplementation 'org.testng:testng:7.7.1'
     implementation 'org.seleniumhq.selenium:selenium-java:4.1.4'
-    implementation 'com.browserstack:browserstack-local-java:1.0.6'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     compileOnly 'com.browserstack:browserstack-java-sdk:latest.release'
 }
-
 group = 'com.browserstack'
 version = '1.0-SNAPSHOT'
-description = 'testng-browserstack'
-sourceCompatibility = '1.8'
+description = 'now-testng-browserstack'
+sourceCompatibility = '11'
 
 def browserstackSDKArtifact = configurations.compileClasspath.resolvedConfiguration.resolvedArtifacts.find { it.name == 'browserstack-java-sdk' }
 
@@ -33,15 +30,6 @@ task sampleTest(type: Test) {
         dependsOn cleanTest
         useDefaultListeners = true
         suites "config/sample-test.testng.xml"
-        jvmArgs "-javaagent:${browserstackSDKArtifact.file}"
-    }
-}
-
-task sampleLocalTest(type: Test) {
-    useTestNG() {
-        dependsOn cleanTest
-        useDefaultListeners = true
-        suites "config/sample-local-test.testng.xml"
         jvmArgs "-javaagent:${browserstackSDKArtifact.file}"
     }
 }

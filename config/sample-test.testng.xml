@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="Cross-Platform">
-    <test name="BStackDemo">
+    <test name="NOWDemoTest">
         <classes>
-            <class name="com.browserstack.BStackDemoTest" />
+            <class name="com.browserstack.NOWDemoTest" />
         </classes>
     </test>
 </suite>
