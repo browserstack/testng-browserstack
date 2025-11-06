@@ -6,6 +6,4 @@ buildName: now-testng-java-web
 projectName: NOW-Web-Test
 percy: true
 accessibility: true
-platforms:
-  ${BSTACK_PLATFORMS}
 parallelsPerPlatform: ${BSTACK_PARALLELS}
