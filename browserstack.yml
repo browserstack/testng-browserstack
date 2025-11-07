@@ -5,5 +5,17 @@ browserstackLocal: ${BROWSERSTACK_LOCAL}
 buildName: now-testng-java-web
 projectName: NOW-Web-Test
 percy: true
+percyCaptureMode: auto
+debug: true
+networkLogs: true
+consoleLogs: verbose
 accessibility: true
+accessibilityOptions:
+    wcagVersion: wcag21aaa # Default: wcag21aa
+    includeIssueType: 
+        bestPractice: true # Default: false
+        needsReview: true # Default: true
+        experimental: false # Default: true
+        advanced: false
 parallelsPerPlatform: ${BSTACK_PARALLELS}
+
