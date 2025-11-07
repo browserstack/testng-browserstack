@@ -9,6 +9,7 @@ percyCaptureMode: auto
 debug: true
 networkLogs: true
 consoleLogs: verbose
+performance: report
 accessibility: true
 accessibilityOptions:
     wcagVersion: wcag21aaa # Default: wcag21aa
