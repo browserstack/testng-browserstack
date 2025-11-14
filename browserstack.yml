@@ -19,3 +19,4 @@ accessibilityOptions:
         experimental: false # Default: true
         advanced: false
 parallelsPerPlatform: ${BSTACK_PARALLELS}
+platforms:
