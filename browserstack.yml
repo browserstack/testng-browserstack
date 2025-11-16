@@ -2,10 +2,10 @@ userName: $BROWSERSTACK_USERNAME
 accessKey: $BROWSERSTACK_ACCESS_KEY
 framework: testng
 browserstackLocal: ${BROWSERSTACK_LOCAL}
-buildName: now-testng-java-web
-projectName: NOW-Web-Test
+buildName: ${BROWSERSTACK_BUILD_NAME}
+projectName: ${BROWSERSTACK_PROJECT_NAME}
 percy: true
-percyCaptureMode: auto
+percyCaptureMode: testcase
 debug: true
 networkLogs: true
 consoleLogs: verbose
