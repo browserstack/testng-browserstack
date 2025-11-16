@@ -13,7 +13,7 @@ public class NOWDemoTest extends SeleniumTest {
         String content = new String(Files.readAllBytes(Paths.get("browserstack.yml")));
         System.out.println(content);
         
-        String webEndpointFromEnv = System.getenv("CX_TEST_URL");
+        String webEndpointFromEnv = System.getenv().getOrDefault("CX_TEST_URL", "https://bstackdemo.com");
         System.out.println("CX_TEST_URL from Env: " + webEndpointFromEnv);
         driver.get(webEndpointFromEnv);
 
