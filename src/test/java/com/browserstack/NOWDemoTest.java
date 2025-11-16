@@ -13,9 +13,9 @@ public class NOWDemoTest extends SeleniumTest {
         String content = new String(Files.readAllBytes(Paths.get("browserstack.yml")));
         System.out.println(content);
         
-        String webDomainFromEnv = System.getenv("NOW_WEB_DOMAIN");
-        System.out.println("Web Domain from Env: " + webDomainFromEnv);
-        driver.get(webDomainFromEnv);
+        String webEndpointFromEnv = System.getenv("CX_TEST_URL");
+        System.out.println("CX_TEST_URL from Env: " + webEndpointFromEnv);
+        driver.get(webEndpointFromEnv);
 
         Assert.assertTrue(driver.getPageSource().length() > 100);
     }
