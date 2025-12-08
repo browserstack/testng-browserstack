@@ -1,7 +1,7 @@
 userName: $BROWSERSTACK_USERNAME
 accessKey: $BROWSERSTACK_ACCESS_KEY
 framework: testng
-browserstackLocal: true # patch fix until we get the reason for Caused by: org.openqa.selenium.WebDriverException: [browserstack.local] is set to true but local testing through BrowserStack is not connected.
+browserstackLocal: ${BROWSERSTACK_LOCAL}
 browserStackLocalOptions:
   localIdentifier: 'browserstack-now-local'
   force: true
