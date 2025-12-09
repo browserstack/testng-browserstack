@@ -1,10 +1,7 @@
 userName: $BROWSERSTACK_USERNAME
 accessKey: $BROWSERSTACK_ACCESS_KEY
 framework: testng
-browserstackLocal: ${BROWSERSTACK_LOCAL}
-browserStackLocalOptions:
-  localIdentifier: 'browserstack-now-local'
-  force: true
+browserstackLocal: ${BROWSERSTACK_LOCAL_CUSTOM}
 buildName: ${BROWSERSTACK_BUILD_NAME}
 source: ${BROWSERSTACK_BUILD_NAME}
 projectName: ${BROWSERSTACK_PROJECT_NAME}
