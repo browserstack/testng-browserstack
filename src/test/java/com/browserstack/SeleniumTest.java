@@ -15,6 +15,7 @@ public class SeleniumTest {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("start-maximized");
         driver = new ChromeDriver(options);
+        driver.get("https://www.bstackdemo.com");
     }
 
     @AfterMethod(alwaysRun = true)
