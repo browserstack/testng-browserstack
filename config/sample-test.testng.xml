@@ -3,7 +3,9 @@
 <suite name="Cross-Platform">
     <test name="BStackDemo">
         <classes>
-            <class name="com.browserstack.BStackDemoTest" />
+            <class name="com.browserstack.modulea.BStackTest" />
+            <class name="com.browserstack.moduleb.BStackTest" />
+            <class name="com.browserstack.modulec.BStackTest" />
         </classes>
     </test>
 </suite>
