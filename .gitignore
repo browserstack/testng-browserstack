@@ -11,3 +11,5 @@ gradlew
 gradlew.bat
 logs
 browserstack.err
+.project
+bin/
