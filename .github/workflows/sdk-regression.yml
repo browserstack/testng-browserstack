@@ -1,0 +1,206 @@
+name: SDK Regression Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Maven profile to run (e.g. sample-test, sample-local-test)'
+        required: true
+        default: 'sample-test'
+      build_name:
+        description: 'BrowserStack build name'
+        required: true
+      project_name:
+        description: 'BrowserStack project name'
+        required: true
+      bs_username:
+        description: 'BrowserStack username'
+        required: true
+      bs_accesskey:
+        description: 'BrowserStack access key'
+        required: true
+      java_version:
+        description: 'Java version'
+        required: false
+        default: '17'
+      jar_url:
+        description: 'Pre-built SDK JAR URL (optional - uses Maven Central LATEST if empty)'
+        required: false
+        default: ''
+      bin_url:
+        description: 'Pre-built binary URL (optional)'
+        required: false
+        default: ''
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java_version }}
+          cache: 'maven'
+
+      - name: Download SDK JAR (if jar_url provided)
+        if: inputs.jar_url != ''
+        run: |
+          echo "Downloading SDK JAR from: ${{ inputs.jar_url }}"
+          JAR_URL="${{ inputs.jar_url }}"
+          # Add https:// if not present
+          if [[ ! "$JAR_URL" =~ ^https?:// ]]; then
+            JAR_URL="https://$JAR_URL"
+          fi
+          curl -fSL "$JAR_URL" -o /tmp/browserstack-java-sdk.jar
+          echo "JAR_PATH=/tmp/browserstack-java-sdk.jar" >> $GITHUB_ENV
+
+      - name: Update pom.xml for custom JAR
+        if: inputs.jar_url != ''
+        run: |
+          # Replace the SDK dependency to use system scope with local JAR
+          python3 - <<'PYEOF'
+          import xml.etree.ElementTree as ET
+
+          ET.register_namespace('', 'http://maven.apache.org/POM/4.0.0')
+          tree = ET.parse('pom.xml')
+          root = tree.getroot()
+          ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+
+          for dep in root.findall('.//m:dependency', ns):
+              artifact = dep.find('m:artifactId', ns)
+              if artifact is not None and artifact.text == 'browserstack-java-sdk':
+                  scope = dep.find('m:scope', ns)
+                  if scope is None:
+                      scope = ET.SubElement(dep, 'scope')
+                  scope.text = 'system'
+
+                  version = dep.find('m:version', ns)
+                  if version is not None:
+                      version.text = '1.0'
+
+                  sys_path = dep.find('m:systemPath', ns)
+                  if sys_path is None:
+                      sys_path = ET.SubElement(dep, 'systemPath')
+                  sys_path.text = '/tmp/browserstack-java-sdk.jar'
+
+          tree.write('pom.xml', xml_declaration=True, encoding='UTF-8')
+          PYEOF
+          echo "Updated pom.xml for custom JAR"
+          cat pom.xml
+
+      - name: Download binary (if bin_url provided)
+        if: inputs.bin_url != ''
+        run: |
+          BIN_URL="${{ inputs.bin_url }}"
+          if [[ ! "$BIN_URL" =~ ^https?:// ]]; then
+            BIN_URL="https://$BIN_URL"
+          fi
+          curl -fSL "$BIN_URL" -o /tmp/binary.zip
+          cd /tmp && unzip -o binary.zip
+          BIN_FILE=$(ls /tmp/BrowserStackLocal* 2>/dev/null | head -1)
+          if [ -n "$BIN_FILE" ]; then
+            chmod +x "$BIN_FILE"
+            echo "SDK_CLI_BIN_PATH=$BIN_FILE" >> $GITHUB_ENV
+          fi
+
+      - name: Write browserstack.yml
+        run: |
+          cat > browserstack.yml <<'YML'
+          userName: ${{ inputs.bs_username }}
+          accessKey: ${{ inputs.bs_accesskey }}
+          projectName: ${{ inputs.project_name }}
+          buildName: ${{ inputs.build_name }}
+          buildIdentifier: '#${BUILD_NUMBER}'
+          framework: testng
+          platforms:
+            - os: Windows
+              osVersion: 10
+              browserName: Chrome
+              browserVersion: latest
+          parallelsPerPlatform: 1
+          browserstackLocal: true
+          debug: true
+          networkLogs: true
+          testObservability: true
+          source: testng:sample-master:v1.1
+          YML
+
+      - name: Run Maven test
+        id: mvn-test
+        run: |
+          export BROWSERSTACK_USERNAME="${{ inputs.bs_username }}"
+          export BROWSERSTACK_ACCESS_KEY="${{ inputs.bs_accesskey }}"
+          export BROWSERSTACK_BUILD_NAME="${{ inputs.build_name }}"
+          export BROWSERSTACK_PROJECT_NAME="${{ inputs.project_name }}"
+          if [ -n "$SDK_CLI_BIN_PATH" ]; then
+            export SDK_CLI_BIN_PATH="$SDK_CLI_BIN_PATH"
+          fi
+
+          mvn test -P ${{ inputs.profile }} --batch-mode 2>&1 | tee /tmp/mvn-output.log
+          MVN_EXIT=${PIPESTATUS[0]}
+          echo "mvn_exit=$MVN_EXIT" >> $GITHUB_OUTPUT
+
+          # Even if mvn returns non-zero (test failures), we still want to extract build IDs
+          # Only fail if mvn couldn't run at all
+          if [ $MVN_EXIT -ne 0 ]; then
+            echo "::warning::Maven exited with code $MVN_EXIT"
+          fi
+
+      - name: Extract build IDs from logs
+        id: extract
+        if: always()
+        run: |
+          # Extract o11y_build_uuid from javaagent log
+          O11Y_UUID=""
+          if [ -f "log/browserstack-javaagent.log" ]; then
+            O11Y_UUID=$(grep 'automation\.browserstack\.com' log/browserstack-javaagent.log | tail -1 | grep -oP 'builds/\K[a-z0-9]+' || true)
+          fi
+          # Fallback: check mvn output
+          if [ -z "$O11Y_UUID" ]; then
+            O11Y_UUID=$(grep 'observability.browserstack.com/builds/' /tmp/mvn-output.log | tail -1 | grep -oP 'builds/\K[a-z0-9]+' || true)
+          fi
+          echo "o11y_build_uuid=$O11Y_UUID" >> $GITHUB_OUTPUT
+          echo "Extracted o11y_build_uuid: $O11Y_UUID"
+
+      - name: Build results JSON
+        if: always()
+        run: |
+          python3 - <<PYEOF
+          import json, os
+
+          results = {
+              "build_name": "${{ inputs.build_name }}",
+              "project_name": "${{ inputs.project_name }}",
+              "profile": "${{ inputs.profile }}",
+              "o11y_build_uuid": "${{ steps.extract.outputs.o11y_build_uuid }}",
+              "mvn_exit_code": int("${{ steps.mvn-test.outputs.mvn_exit || '1' }}"),
+              "java_version": "${{ inputs.java_version }}",
+          }
+
+          os.makedirs("/tmp/results", exist_ok=True)
+          with open("/tmp/results/results.json", "w") as f:
+              json.dump(results, f, indent=2)
+
+          print(json.dumps(results, indent=2))
+          PYEOF
+
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-regression-results
+          path: /tmp/results/results.json
+          retention-days: 7
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-regression-logs
+          path: |
+            log/
+            /tmp/mvn-output.log
+          retention-days: 7
